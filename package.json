@@ -1,0 +1,11 @@
+{
+  "name": "ai.ailia.ailia_llm",
+  "version": "0.1.0",
+  "displayName": "ailia LLM",
+  "description": "ailia LLM for Unity Engine",
+  "author": {
+    "name": "ax Inc.",
+    "email": "contact@axinc.jp",
+    "url": "https://axinc.jp/"
+  }
+}
