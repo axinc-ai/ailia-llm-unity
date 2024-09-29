@@ -32,13 +32,13 @@ public class AiliaLLM
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMCreate(ref IntPtr net);
 
-    #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
-        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
-        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
-    #else
+    //#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+    //    [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
+    //    public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
+    //#else
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileA", CharSet=CharSet.Ansi)]
         public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
-    #endif
+    //#endif
 
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMSetPrompt(IntPtr net, IntPtr messages, uint messages_len);
