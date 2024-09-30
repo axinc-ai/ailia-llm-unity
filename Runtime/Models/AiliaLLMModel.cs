@@ -35,12 +35,12 @@ public class AiliaLLMModel : IDisposable
 	* @return
 	*   If this function is successful, it returns  true  , or  false  otherwise.
 	*/
-	public bool Create(){
+	public bool Create(int n_ctx = 0){
 		if (net != IntPtr.Zero){
 			Close();
 		}
 
-		int status = AiliaLLM.ailiaLLMCreate(ref net);
+		int status = AiliaLLM.ailiaLLMCreate(ref net, n_ctx);
 		if (status != 0){
 			return false;
 		}
@@ -51,17 +51,19 @@ public class AiliaLLMModel : IDisposable
 	/**
 	* \~japanese
 	* @brief モデルファイルを開きます。
-	* @param model_path          モデルファイルへのパス。(nullの場合は読み込まない)
+	* @param model_path          モデルファイルへのパス。
+	* @param template_path       テンプレートファイルへのパス。
 	* @return
 	*   成功した場合はtrue、失敗した場合はfalseを返す。
 	*   
 	* \~english
 	* @brief   Open a model.
-	* @param model_path          Path for model (don't load if null)
+	* @param model_path          Path for model
+	* @param template_path       Path for template
 	* @return
 	*   If this function is successful, it returns  true  , or  false  otherwise.
 	*/
-	public bool Open(string model_path){
+	public bool Open(string model_path, string template_path){
 		if (net == IntPtr.Zero){
 			return false;
 		}
@@ -69,6 +71,11 @@ public class AiliaLLMModel : IDisposable
 		int status = 0;
 		
 		status = AiliaLLM.ailiaLLMOpenModelFile(net, model_path);
+		if (status != 0){
+			return false;
+		}
+
+		status = AiliaLLM.ailiaLLMOpenTemplateFile(net, template_path);
 		if (status != 0){
 			return false;
 		}

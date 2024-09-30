@@ -30,15 +30,23 @@ public class AiliaLLM
     }
 
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMCreate(ref IntPtr net);
+    public static extern int ailiaLLMCreate(ref IntPtr net, int n_ctx);
 
-    //#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
-    //    [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
-    //    public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
-    //#else
+    #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
+        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
+    #else
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileA", CharSet=CharSet.Ansi)]
         public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
-    //#endif
+    #endif
+
+    #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenTemplateFileW", CharSet=CharSet.Unicode)]
+        public static extern int ailiaLLMOpenTemplateFile(IntPtr net, string path);
+    #else
+        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenTemplateFileA", CharSet=CharSet.Ansi)]
+        public static extern int ailiaLLMOpenTemplateFile(IntPtr net, string path);
+    #endif
 
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMSetPrompt(IntPtr net, IntPtr messages, uint messages_len);
@@ -46,11 +54,8 @@ public class AiliaLLM
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMGenerate(IntPtr net, ref bool done);
 
-
-
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMGetDeltaTextSize(IntPtr net, ref uint len);
-
 
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMGetDeltaText(IntPtr net, IntPtr text, uint len);
