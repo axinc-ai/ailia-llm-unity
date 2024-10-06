@@ -19,6 +19,7 @@ public class AiliaLLMModel : IDisposable
 {
 	// instance
 	IntPtr net = IntPtr.Zero;
+	bool context_full = false;
 	bool logging = true;
 
 	/****************************************************************
@@ -201,14 +202,51 @@ public class AiliaLLMModel : IDisposable
 			handle_list[i].Free();
 		}
 
+		context_full = false;
+
 		if (status != 0){
 			if (logging)
 			{
 				Debug.Log("ailiaLLMSetPrompt failed " + status);
 			}
+			if (status == AiliaLLM.AILIA_LLM_STATUS_CONTEXT_FULL){
+				context_full = true;
+			}
 			return false;
 		}
 
+		return true;
+	}
+
+	/**
+	* \~japanese
+	* @brief 生成を実行します。
+	* @param done    生成が終了したかどうか。
+	* @return
+	*   成功した場合はtrue、失敗した場合はfalseを返す。
+	*   
+	* \~english
+	* @brief   Perform encode
+	* @param done    Is done generation
+	* @return
+	*   If this function is successful, it returns array of tokens  , or  empty array  otherwise.
+	*/
+	public bool Generate(ref bool done)
+	{
+		uint done_uint = 0;
+		int status = AiliaLLM.ailiaLLMGenerate(net, ref done_uint);
+		context_full = false;
+		done = (done_uint == 1);
+		if (status != 0){
+			if (logging)
+			{
+				Debug.Log("ailiaLLMGenerate failed " + status);
+			}
+			if (status == AiliaLLM.AILIA_LLM_STATUS_CONTEXT_FULL){
+				context_full = true;
+			}
+			return false;
+		}
 		return true;
 	}
 
@@ -255,30 +293,18 @@ public class AiliaLLMModel : IDisposable
 
 	/**
 	* \~japanese
-	* @brief 生成を実行します。
-	* @param done    生成が終了したかどうか。
+	* @brief コンテキスト長の上限に達したかどうかを取得します。
 	* @return
-	*   成功した場合はtrue、失敗した場合はfalseを返す。
+	*   上限に達した場合はtrue、達していない場合はfalse。
 	*   
 	* \~english
-	* @brief   Perform encode
-	* @param done    Is done generation
+	* @brief   Check if the context length limit has been reached. 
 	* @return
-	*   If this function is successful, it returns array of tokens  , or  empty array  otherwise.
+	*   True if the limit is reached, false otherwise. 
 	*/
-	public bool Generate(ref bool done)
+	public bool ContextFull()
 	{
-		uint done_uint = 0;
-		int status = AiliaLLM.ailiaLLMGenerate(net, ref done_uint);
-		done = (done_uint == 1);
-		if (status != 0){
-			if (logging)
-			{
-				Debug.Log("ailiaLLMGenerate failed " + status);
-			}
-			return false;
-		}
-		return true;
+		return context_full;
 	}
 }
 } // namespace ailiaLLM
