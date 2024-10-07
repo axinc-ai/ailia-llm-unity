@@ -178,7 +178,6 @@ public class AiliaLLM
     * \~japanese
     * @brief LLMオブジェクトを作成します。
     * @param llm LLMオブジェクトポインタへのポインタ
-    * @param n_ctx コンテキスト長（0でモデルのデフォルト）
     * @return
     *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
     * @details
@@ -187,20 +186,20 @@ public class AiliaLLM
     * \~english
     * @brief Creates a LLM instance.
     * @param llm A pointer to the LLM instance pointer
-    * @param n_ctx Context length for model (0 is model default）
     * @return
     *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
     * @details
     *   Creates a LLM instance.
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMCreate(ref IntPtr net, uint n_ctx);
+    public static extern int ailiaLLMCreate(ref IntPtr net);
 
     /**
     * \~japanese
     * @brief モデルファイルを読み込みます。
     * @param llm LLMオブジェクトポインタへのポインタ
     * @param path GGUFファイルのパス
+    * @param n_ctx コンテキスト長（0でモデルのデフォルト）
     * @return
     *   成功した場合は \ref AILIA_STATUS_SUCCESS 、そうでなければエラーコードを返す。
     * @details
@@ -210,6 +209,7 @@ public class AiliaLLM
     * @brief Open model file.
     * @param llm A pointer to the LLM instance pointer
     * @param path Path for GGUF
+    * @param n_ctx Context length for model (0 is model default）
     * @return
     *   If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
     * @details
@@ -217,10 +217,10 @@ public class AiliaLLM
     */
     #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
-        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
+        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path, uint n_ctx);
     #else
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileA", CharSet=CharSet.Ansi)]
-        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path);
+        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path, uint n_ctx);
     #endif
 
     /**

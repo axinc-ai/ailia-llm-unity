@@ -29,22 +29,20 @@ public class AiliaLLMModel : IDisposable
 	/**
 	* \~japanese
 	* @brief インスタンスを作成します。
-	* @param n_ctx コンテキスト長（0でモデルのデフォルト）
 	* @return
 	*   成功した場合はtrue、失敗した場合はfalseを返す。
 	*   
 	* \~english
 	* @brief   Create a instance.
-    * @param n_ctx Context length for model (0 is model default）
 	* @return
 	*   If this function is successful, it returns  true  , or  false  otherwise.
 	*/
-	public bool Create(uint n_ctx = 0){
+	public bool Create(){
 		if (net != IntPtr.Zero){
 			Close();
 		}
 
-		int status = AiliaLLM.ailiaLLMCreate(ref net, n_ctx);
+		int status = AiliaLLM.ailiaLLMCreate(ref net);
 		if (status != 0){
 			if (logging)
 			{
@@ -59,24 +57,26 @@ public class AiliaLLMModel : IDisposable
 	/**
 	* \~japanese
 	* @brief モデルファイルを開きます。
-	* @param model_path          モデルファイルへのパス。
+	* @param model_path    モデルファイルへのパス。
+	* @param n_ctx         コンテキスト長（0でモデルのデフォルト）
 	* @return
 	*   成功した場合はtrue、失敗した場合はfalseを返す。
 	*   
 	* \~english
 	* @brief   Open a model.
-	* @param model_path          Path for model
+	* @param model_path    Path for model
+    * @param n_ctx         Context length for model (0 is model default）
 	* @return
 	*   If this function is successful, it returns  true  , or  false  otherwise.
 	*/
-	public bool Open(string model_path){
+	public bool Open(string model_path, uint n_ctx = 0){
 		if (net == IntPtr.Zero){
 			return false;
 		}
 
 		int status = 0;
 		
-		status = AiliaLLM.ailiaLLMOpenModelFile(net, model_path);
+		status = AiliaLLM.ailiaLLMOpenModelFile(net, model_path, n_ctx);
 		if (status != 0){
 			if (logging)
 			{
