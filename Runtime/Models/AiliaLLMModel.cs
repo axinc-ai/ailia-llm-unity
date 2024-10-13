@@ -21,6 +21,8 @@ public class AiliaLLMModel : IDisposable
 	IntPtr net = IntPtr.Zero;
 	bool context_full = false;
 	bool logging = true;
+	byte [] buf = new byte[0];
+	string before_text = "";
 
 	/****************************************************************
 	 * モデル
@@ -203,6 +205,8 @@ public class AiliaLLMModel : IDisposable
 		}
 
 		context_full = false;
+		buf = new byte[0];
+		before_text = "";
 
 		if (status != 0){
 			if (logging)
@@ -284,11 +288,23 @@ public class AiliaLLMModel : IDisposable
 			}
 			return "";
 		}
-		byte[] text_split = new byte [len - 1]; // NULLも時の削除
-		for (int i = 0; i < len - 1; i++){
-			text_split[i] = text[i];
+		
+		byte[] new_buf = new byte [buf.Length + len - 1];
+		for (int i = 0; i < buf.Length; i++){
+			new_buf[i] = buf[i];
 		}
-		return System.Text.Encoding.UTF8.GetString(text_split);
+		for (int i = 0; i < len - 1; i++){ // NULLの削除
+			new_buf[buf.Length + i] = text[i];
+		}
+		buf = new_buf;
+
+		string decoded_text = System.Text.Encoding.UTF8.GetString(buf); // Unicode Decode Errorは発生しない
+		string delta_text = "";
+		if (decoded_text.Length > before_text.Length){
+			delta_text = decoded_text.Substring(before_text.Length);
+		}
+		before_text = decoded_text;
+		return delta_text;
 	}
 
 	/**
