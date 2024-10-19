@@ -192,7 +192,7 @@ public class AiliaLLM
     *   Creates a LLM instance.
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMCreate(ref IntPtr net);
+    public static extern int ailiaLLMCreate(ref IntPtr llm);
 
     /**
     * \~japanese
@@ -217,10 +217,10 @@ public class AiliaLLM
     */
     #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileW", CharSet=CharSet.Unicode)]
-        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path, uint n_ctx);
+        public static extern int ailiaLLMOpenModelFile(IntPtr llm, string path, uint n_ctx);
     #else
         [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenModelFileA", CharSet=CharSet.Ansi)]
-        public static extern int ailiaLLMOpenModelFile(IntPtr net, string path, uint n_ctx);
+        public static extern int ailiaLLMOpenModelFile(IntPtr llm, string path, uint n_ctx);
     #endif
 
     /**
@@ -247,7 +247,7 @@ public class AiliaLLM
     *   Please include ChatHistory in the message as well.
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMSetPrompt(IntPtr net, IntPtr messages, uint messages_len);
+    public static extern int ailiaLLMSetPrompt(IntPtr llm, IntPtr messages, uint messages_len);
 
     /**
     * \~japanese
@@ -273,7 +273,7 @@ public class AiliaLLM
     *   The value of done is 0 or 1. If done is 1, the generation is complete.
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMGenerate(IntPtr net, ref uint done);
+    public static extern int ailiaLLMGenerate(IntPtr llm, ref uint done);
 
     /**
     * \~japanese
@@ -291,7 +291,7 @@ public class AiliaLLM
     *   If this function is successful, it returns  \ref AILIA_STATUS_SUCCESS , or an error code otherwise.
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMGetDeltaTextSize(IntPtr net, ref uint len);
+    public static extern int ailiaLLMGetDeltaTextSize(IntPtr llm, ref uint len);
 
     /**
     * \~japanese
@@ -315,7 +315,27 @@ public class AiliaLLM
     *   If  ailiaLLMGenerate()  is not run at all, the function returns  \ref AILIA_STATUS_INVALID_STATE .
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMGetDeltaText(IntPtr net, IntPtr text, uint len);
+    public static extern int ailiaLLMGetDeltaText(IntPtr llm, IntPtr text, uint len);
+
+    /**
+    * \~japanese
+    * @brief トークンの数を取得します。
+    * @param llm   LLMオブジェクトポインタ
+    * @param cnt   トークンの数
+    * @param text  テキスト(UTF8)
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    *
+    * \~english
+    * @brief Gets the count of token.
+    * @param llm   A LLM instance pointer
+    * @param cnt   The count of token
+    * @param text  Text(UTF8)
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetTokenCount(IntPtr llm, ref uint cnt, IntPtr text);
 
     /**
     * \~japanese
@@ -327,6 +347,6 @@ public class AiliaLLM
     * @param llm A LLM instance pointer
     */
     [DllImport(LIBRARY_NAME)]
-    public static extern void ailiaLLMDestroy(IntPtr net);
+    public static extern void ailiaLLMDestroy(IntPtr llm);
 }
 } // namespace ailiaLLM
