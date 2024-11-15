@@ -225,6 +225,34 @@ public class AiliaLLM
 
     /**
     * \~japanese
+    * @brief サンプリングのパラメータを設定します。
+    * @param llm LLMオブジェクトポインタへのポインタ
+    * @param top_k サンプリングする確率値の上位個数、デフォルト40
+    * @param top_p サンプリングする確率値の範囲、デフォルト0.9（0.9〜1.0）
+    * @param temp 温度パラメータ、デフォルト0.4
+    * @param dist シード、デフォルト1234
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   LLMのサンプリングの設定を行います。ailiaLLMSetPromptの前に実行する必要があります。
+    *
+    * \~english
+    * @brief Set the sampling parameter.
+    * @param llm A pointer to the LLM instance pointer
+    * @param top_k Sampling probability value's top number, default 40
+    * @param top_p Sampling probability value range, default 0.9 (0.9 to 1.0)
+    * @param temp Temperature parameter, default 0.4
+    * @param dist Seed, default 1234 
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *  Set LLM sampling parameters. Must be run before ailiaLLMSetPrompt. 
+    */
+     [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMSetSamplingParams(IntPtr llm, uint top_k, float top_p, float temp, uint dist);
+
+    /**
+    * \~japanese
     * @brief プロンプトを設定します。
     * @param llm LLMオブジェクトポインタへのポインタ
     * @param message メッセージの配列

@@ -143,13 +143,44 @@ public class AiliaLLMModel : IDisposable
 
 	/**
 	* \~japanese
+	* @brief サンプリングパラメータを設定します。
+    * @param top_k サンプリングする確率値の上位個数、デフォルト40
+    * @param top_p サンプリングする確率値の範囲、デフォルト0.9（0.9〜1.0）
+    * @param temp 温度パラメータ、デフォルト0.4
+    * @param dist シード、デフォルト1234
+	* @return
+	*   成功した場合はtrue、失敗した場合はfalseを返す。
+	*   
+	* \~english
+	* @brief Set the sampling parameter.
+    * @param top_k Sampling probability value's top number, default 40
+    * @param top_p Sampling probability value range, default 0.9 (0.9 to 1.0)
+    * @param temp Temperature parameter, default 0.4
+    * @param dist Seed, default 1234 
+	* @return
+	*   If this function is successful, it returns  true  , or  false  otherwise.
+	*/
+	public bool SetSamplingParam(uint top_k, float top_p, float temp, uint dist){
+		int status = AiliaLLM.ailiaLLMSetSamplingParams(net, top_k, top_p, temp, dist);
+		if (status != 0){
+			if (logging)
+			{
+				Debug.Log("ailiaLLMSetSamplingParams failed " + status);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	* \~japanese
 	* @brief プロンプトを設定します。
 	* @param messages          プロンプトメッセージ。
 	* @return
 	*   成功した場合はtrue、失敗した場合はfalseを返す。
 	*   
 	* \~english
-	* @brief   Set prompt messages.
+	* @brief Set prompt messages.
 	* @param messages          Prompt messages
 	* @return
 	*   If this function is successful, it returns  true  , or  false  otherwise.
