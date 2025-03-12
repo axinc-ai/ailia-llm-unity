@@ -367,6 +367,50 @@ public class AiliaLLM
 
     /**
     * \~japanese
+    * @brief プロンプトトークンの数を取得します。
+    * @param llm   LLMオブジェクトポインタ
+    * @param cnt   プロンプトトークンの数
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   ailiaLLMSetPromptを呼び出した後に呼び出し可能です。
+    *
+    * \~english
+    * @brief Gets the count of prompt token.
+    * @param llm   A LLM instance pointer
+    * @param cnt   The count of prompt token
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *   It can be called after calling ailiaLLMSetPrompt.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetPromptTokenCount(IntPtr llm, ref uint cnt);
+
+    /**
+    * \~japanese
+    * @brief 生成したトークンの数を取得します。
+    * @param llm   LLMオブジェクトポインタ
+    * @param cnt   生成したトークンの数
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   ailiaLLMGenerateを呼び出した後に呼び出し可能です。
+    *
+    * \~english
+    * @brief Gets the count of prompt token.
+    * @param llm   A LLM instance pointer
+    * @param cnt   The count of generated token
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *   It can be called after calling ailiaLLMGenerate.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetGeneratedTokenCount(IntPtr llm, ref uint cnt);
+
+    /**
+    * \~japanese
     * @brief LLMオブジェクトを破棄します。
     * @param llm LLMオブジェクトポインタ
     *
