@@ -174,6 +174,70 @@ public class AiliaLLM
         public IntPtr content;
     }
 
+    /****************************************************************
+    * マルチモーダル画像/音声データ
+    **/
+    
+    /**
+    * \~japanese
+    * @brief マルチモーダル用のメディアデータ構造体
+    * \~english
+    * @brief Media data structure for multimodal processing
+    */
+    [StructLayout(LayoutKind.Sequential)]
+    public class AILIALLMMediaData {
+        /**
+        * @brief Media type (image, audio)
+        */
+        public IntPtr media_type;
+        /**
+        * @brief Path to the media file
+        */
+        public IntPtr file_path;
+        /**
+        * @brief Optional: Raw media data (alternative to file_path)
+        */
+        public IntPtr data;
+        /**
+        * @brief Size of the raw data (used with data parameter)
+        */
+        public uint data_size;
+        /**
+        * @brief Width for images (pixels), sample count for audio
+        */
+        public uint width;
+        /**
+        * @brief Height for images (pixels), unused for audio (set to 0)
+        */
+        public uint height;
+    }
+
+    /**
+    * \~japanese
+    * @brief マルチモーダル対応チャットメッセージ
+    * \~english
+    * @brief Multimodal chat message with media attachments
+    */
+    [StructLayout(LayoutKind.Sequential)]
+    public class AILIALLMMultimodalChatMessage {
+        /**
+        * @brief Represent the role. (system, user, assistant)
+        */
+        public IntPtr role;
+        /**
+        * @brief Represent the content of the message. Use <__media__> placeholder for media.
+        */
+        public IntPtr content;
+        /**
+        * @brief Array of media data (images, audio) referenced by <__media__> markers
+        */
+        public IntPtr media_data;
+        /**
+        * @brief Number of media items in media_data array
+        */
+        public uint media_count;
+    }
+
     /**
     * \~japanese
     * @brief LLMオブジェクトを作成します。
@@ -408,6 +472,144 @@ public class AiliaLLM
     */
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMGetGeneratedTokenCount(IntPtr llm, ref uint cnt);
+
+    /**
+    * \~japanese
+    * @brief コンテキストの長さを取得します。
+    * @param llm   LLMオブジェクトポインタ
+    * @param context_size  コンテキストの長さ
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    *
+    * \~english
+    * @brief Gets the size of context.
+    * @param llm   A LLM instance pointer
+    * @param context_size  The length of context
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetContextSize(IntPtr llm, ref uint context_size);
+
+    /****************************************************************
+    * マルチモーダル LLM API
+    **/
+
+    /**
+    * \~japanese
+    * @brief マルチモーダルプロジェクタファイルを読み込みます。
+    * @param llm LLMオブジェクトポインタ
+    * @param mmproj_path MMPROJファイルのパス（GGUF形式）
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   マルチモーダル機能を使用するには、先にailiaLLMOpenModelFileでテキストモデルを読み込み、
+    *   その後でこの関数でマルチモーダルプロジェクタを読み込む必要があります。
+    *
+    * \~english
+    * @brief Load multimodal projector file.
+    * @param llm A LLM instance pointer
+    * @param mmproj_path Path to the MMPROJ file (GGUF format)
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *   To use multimodal features, you must first load the text model with ailiaLLMOpenModelFile,
+    *   then load the multimodal projector with this function.
+    */
+    #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN)
+        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenMultimodalProjectorFileW", CharSet=CharSet.Unicode)]
+        public static extern int ailiaLLMOpenMultimodalProjectorFile(IntPtr llm, string mmproj_path);
+    #else
+        [DllImport(LIBRARY_NAME, EntryPoint = "ailiaLLMOpenMultimodalProjectorFileA", CharSet=CharSet.Ansi)]
+        public static extern int ailiaLLMOpenMultimodalProjectorFile(IntPtr llm, string mmproj_path);
+    #endif
+
+    /**
+    * \~japanese
+    * @brief マルチモーダル機能がサポートされているかを確認します。
+    * @param llm LLMオブジェクトポインタ
+    * @param vision_support 画像処理をサポートしているか
+    * @param audio_support 音声処理をサポートしているか
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   ailiaLLMOpenMultimodalProjectorFileの後に呼び出し可能です。
+    *
+    * \~english
+    * @brief Check if multimodal features are supported.
+    * @param llm A LLM instance pointer
+    * @param vision_support Whether image processing is supported
+    * @param audio_support Whether audio processing is supported
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *   Can be called after ailiaLLMOpenMultimodalProjectorFile.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetMultimodalCapabilities(IntPtr llm, ref uint vision_support, ref uint audio_support);
+
+    /**
+    * \~japanese
+    * @brief マルチモーダルプロンプトを設定します。
+    * @param llm LLMオブジェクトポインタ
+    * @param message マルチモーダルメッセージの配列
+    * @param message_cnt メッセージの数
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    * @details
+    *   マルチモーダル対応のプロンプトを設定します。メッセージのcontentに<__media__>プレースホルダーを含め、
+    *   対応するメディアデータをmedia_dataに設定してください。
+    *   例: "この画像について説明してください: <__media__>"
+    *
+    * \~english
+    * @brief Set multimodal prompt.
+    * @param llm A LLM instance pointer
+    * @param message Array of multimodal messages
+    * @param message_cnt Number of messages
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    * @details
+    *   Set multimodal prompt. Include <__media__> placeholders in message content,
+    *   and set corresponding media data in media_data.
+    *   Example: "Describe this image: <__media__>"
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMSetMultimodalPrompt(IntPtr llm, IntPtr messages, uint messages_len);
+
+    /**
+    * \~japanese
+    * @brief 利用可能な計算環境(CPU, GPU)の数を取得します
+    * @param env_count 計算環境情報の数の格納先
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    *
+    * \~english
+    * @brief Gets the number of available computational environments (CPU, GPU).
+    * @param env_count The storage location of the number of computational environment information
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetBackendCount(ref uint env_count);
+
+    /**
+    * \~japanese
+    * @brief 計算環境の一覧を取得します
+    * @param env 計算環境情報の格納先(AILIANetworkインスタンスを破棄するまで有効)
+    * @param env_idx 計算環境情報のインデックス(0～ ailiaLLMGetBackendCount() -1)
+    * @return
+    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
+    *
+    * \~english
+    * @brief Gets the list of computational environments.
+    * @param env The storage location of the computational environment information (valid until the AILIANetwork instance
+    * is destroyed)
+    * @param env_idx The index of the computational environment information (0 to  ailiaLLMGetBackendCount() -1)
+    * @return
+    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
+    */
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetBackendName(ref IntPtr env, uint env_idx);
 
     /**
     * \~japanese
