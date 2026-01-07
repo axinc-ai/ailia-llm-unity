@@ -353,5 +353,39 @@ public class AiliaLLMModel : IDisposable
 	{
 		return context_full;
 	}
+
+	/**
+	* \~japanese
+	* @brief プロンプトのトークンの数を取得します。
+	* @return
+	*   プロンプトのトークン数。失敗時は0。
+	*   
+	* \~english
+	* @brief   Gets the number of prompt tokens.
+	* @return
+	*   Number of prompt tokens. 0 if failed.
+	*/
+	public uint PromptTokenCount(){
+		uint count = 0;
+		AiliaLLM.ailiaLLMGetPromptTokenCount(net, ref count);
+		return count;
+	}
+
+	/**
+	* \~japanese
+	* @brief 生成したトークンの数を取得します。
+	* @return
+	*   生成したトークン数。失敗時は0。
+	*   
+	* \~english
+	* @brief   Gets the number of tokens generated.
+	* @return
+	*   Number of tokens generated. 0 if failed.
+	*/
+	public uint GeneratedTokenCount(){
+		uint count = 0;
+		AiliaLLM.ailiaLLMGetGeneratedTokenCount(net, ref count);
+		return count;
+	}
 }
 } // namespace ailiaLLM
