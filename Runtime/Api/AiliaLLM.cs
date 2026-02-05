@@ -134,18 +134,6 @@ public class AiliaLLM
     public const int AILIA_LLM_STATUS_CONTEXT_FULL = (-8);
     /**
     * \~japanese
-    * @def AILIA_LLM_STATUS_ERROR_BUFFER_API
-    * @brief バッファの読み込みに失敗した
-    * @remark バッファの形式やサイズが正しいことを確認してください。
-    *
-    * \~english
-    * @def AILIA_LLM_STATUS_ERROR_BUFFER_API
-    * @brief Buffer read failed.
-    * @remark Please check that the buffer format and size are correct.
-    */
-    public const int AILIA_LLM_STATUS_ERROR_BUFFER_API = (-9);
-    /**
-    * \~japanese
     * @def AILIA_LLM_STATUS_UNIMPLEMENTED
     * @brief 未実装
     * @remark
