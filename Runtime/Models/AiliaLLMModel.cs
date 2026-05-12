@@ -249,36 +249,6 @@ public class AiliaLLMModel : IDisposable
 
 	/**
 	* \~japanese
-	* @brief Thinking（推論過程の出力）を有効または無効にします。
-	* @param enable trueで有効、falseで無効（デフォルト：無効）
-	* @return
-	*   成功した場合はtrue、失敗した場合はfalseを返す。
-	* @details
-	*   Thinkingモデル（Gemma4等）の推論過程の出力を制御します。SetPromptの前に実行する必要があります。
-	*
-	* \~english
-	* @brief Enable or disable thinking (reasoning output).
-	* @param enable true to enable, false to disable (default: disabled)
-	* @return
-	*   If this function is successful, it returns  true  , or  false  otherwise.
-	* @details
-	*   Controls whether thinking models (e.g. Gemma4) output their reasoning process.
-	*   Must be called before SetPrompt.
-	*/
-	public bool SetThinking(bool enable){
-		int status = AiliaLLM.ailiaLLMSetThinking(net, enable ? 1u : 0u);
-		if (status != 0){
-			if (logging)
-			{
-				Debug.Log("ailiaLLMSetThinking failed " + status);
-			}
-			return false;
-		}
-		return true;
-	}
-
-	/**
-	* \~japanese
 	* @brief プロンプトを設定します。
 	* @param messages          プロンプトメッセージ。
 	* @return
