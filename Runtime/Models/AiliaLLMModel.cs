@@ -360,6 +360,109 @@ public class AiliaLLMModel : IDisposable
 
 	/**
 	* \~japanese
+	* @brief ツール（関数）の定義を設定します。
+	* @param tools_json OpenAI互換のツール定義JSON配列。nullまたは空文字列で解除します。
+	* @return
+	*   成功した場合はtrue、失敗した場合はfalseを返す。
+	* @details
+	*   例: [{"type":"function","function":{"name":"get_weather","description":"...","parameters":{...}}}]
+	*   設定したツールは次回のSetPrompt時にチャットテンプレート経由でプロンプトへ展開され、
+	*   生の出力はParseResponseでツール呼び出しとして構造化できます。Gemma 4などツール呼び出し対応モデルで使用できます。
+	*   ツール設定中、role "assistant" のcontentは生の出力（GetDeltaTextの連結）、role "tool" のcontentはツールの実行結果として
+	*   解釈されます。toolメッセージは直前のassistantのツール呼び出しと順序で対応付けられます。ツール未設定でtoolロールを渡すと失敗します。
+	*
+	* \~english
+	* @brief Set the tool (function) definitions.
+	* @param tools_json OpenAI-compatible JSON array of tool definitions. null or an empty string clears the tools.
+	* @return
+	*   If this function is successful, it returns  true  , or  false  otherwise.
+	* @details
+	*   Example: [{"type":"function","function":{"name":"get_weather","description":"...","parameters":{...}}}]
+	*   The tools are rendered into the prompt on the next SetPrompt, and the raw output can be parsed into
+	*   tool calls with ParseResponse. Available for models supporting tool calling (e.g. Gemma 4).
+	*   While tools are set, the content of role "assistant" is the raw output (concatenation of GetDeltaText) and
+	*   the content of role "tool" is the tool result, matched to the tool calls of the preceding assistant message by order.
+	*   A tool message while no tools are set fails.
+	*/
+	public bool SetTools(string tools_json)
+	{
+		int status = 0;
+		if (string.IsNullOrEmpty(tools_json)){
+			status = AiliaLLM.ailiaLLMSetTools(net, IntPtr.Zero);
+		} else {
+			byte[] tools_bytes = System.Text.Encoding.UTF8.GetBytes(tools_json + "\u0000");
+			GCHandle tools_handle = GCHandle.Alloc(tools_bytes, GCHandleType.Pinned);
+			status = AiliaLLM.ailiaLLMSetTools(net, tools_handle.AddrOfPinnedObject());
+			tools_handle.Free();
+		}
+		if (status != 0){
+			if (logging)
+			{
+				Debug.Log("ailiaLLMSetTools failed " + status);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	* \~japanese
+	* @brief モデルの生の出力テキストを解析し、OpenAI互換のassistantメッセージJSONに変換します。
+	* @param text GetDeltaTextで取得したテキストを連結した生の出力
+	* @return
+	*   {"role":"assistant","content":"...","reasoning_content":"...","tool_calls":[{"id":"call_0","type":"function","function":{"name":"...","arguments":"{...}"}}]} 形式のJSON。失敗時は空文字列。
+	* @details
+	*   reasoning_contentはThinkingの出力が含まれる場合のみ、tool_callsはツール呼び出しが含まれる場合のみ出力されます。
+	*   解析器はSetPromptで生成されます。SetPrompt前、またはSetTools / SetThinking後にSetPromptを呼んでいない場合、
+	*   およびテキストがツール呼び出し構文と一致しない場合（生成途中のテキストを含む）は失敗します。
+	*
+	* \~english
+	* @brief Parses the raw output text of the model into an OpenAI-compatible assistant message JSON.
+	* @param text Raw output, i.e. the concatenation of the text obtained with GetDeltaText
+	* @return
+	*   JSON in the form {"role":"assistant","content":"...","reasoning_content":"...","tool_calls":[{"id":"call_0","type":"function","function":{"name":"...","arguments":"{...}"}}]}. Empty string on failure.
+	* @details
+	*   reasoning_content is present only when the text contains thinking output, and tool_calls only when it contains tool calls.
+	*   The parser is built by SetPrompt. The call fails before SetPrompt, after SetTools / SetThinking without a new SetPrompt,
+	*   and when the text does not match the tool call syntax (including an unfinished output).
+	*/
+	public string ParseResponse(string text)
+	{
+		if (text == null){
+			return "";
+		}
+		byte[] text_bytes = System.Text.Encoding.UTF8.GetBytes(text + "\u0000");
+		GCHandle text_handle = GCHandle.Alloc(text_bytes, GCHandleType.Pinned);
+		IntPtr text_ptr = text_handle.AddrOfPinnedObject();
+
+		uint len = 0;
+		int status = AiliaLLM.ailiaLLMParseResponseSize(net, text_ptr, ref len);
+		if (status != 0){
+			text_handle.Free();
+			if (logging)
+			{
+				Debug.Log("ailiaLLMParseResponseSize failed " + status);
+			}
+			return "";
+		}
+		byte[] json = new byte [len];
+		GCHandle handle = GCHandle.Alloc(json, GCHandleType.Pinned);
+		IntPtr output = handle.AddrOfPinnedObject();
+		status = AiliaLLM.ailiaLLMParseResponse(net, text_ptr, output, len);
+		handle.Free();
+		text_handle.Free();
+		if (status != 0){
+			if (logging)
+			{
+				Debug.Log("ailiaLLMParseResponse failed " + status);
+			}
+			return "";
+		}
+		return System.Text.Encoding.UTF8.GetString(json, 0, (int)len - 1); // NULLの削除
+	}
+
+	/**
+	* \~japanese
 	* @brief マルチモーダルプロンプトを設定します。
 	* @param messages          マルチモーダルプロンプトメッセージ。
 	* @return
