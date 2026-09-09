@@ -372,8 +372,9 @@ public class AiliaLLM
     * @details
     *   OpenAI Chat Completions APIのtoolsパラメータと同じ形式でツールを定義します。
     *   設定したツールは次回のailiaLLMSetPrompt時にチャットテンプレート経由でプロンプトへ展開され、
-    *   出力はツール呼び出し構文のgrammarで制約されます。生の出力はailiaLLMParseResponseで構造化できます。
+    *   出力はツール呼び出し構文のgrammarで制約されます。生の出力はailiaLLMGetResponseJsonで構造化できます。
     *   ツール設定中、role "assistant" のcontentは生の出力、role "tool" のcontentはツールの実行結果として解釈されます。
+    *   ツール設定中は従来のプロンプトAPIを拒否します。SetPromptJson/GetResponseJsonを使用してください。
     *
     * \~english
     * @brief Set the tool (function) definitions.
@@ -384,59 +385,12 @@ public class AiliaLLM
     * @details
     *   Tools are defined in the same format as the tools parameter of the OpenAI Chat Completions API.
     *   They are rendered into the prompt through the chat template on the next ailiaLLMSetPrompt,
-    *   and the output is constrained by a grammar for the tool call syntax. Parse the raw output with ailiaLLMParseResponse.
+    *   and the output is constrained by a grammar for the tool call syntax. Parse the raw output with ailiaLLMGetResponseJson.
     *   While tools are set, the content of role "assistant" is the raw output and the content of role "tool" is the tool result.
+    *   Legacy prompt APIs reject tool use. Use SetPromptJson/GetResponseJson instead.
     */
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMSetTools(IntPtr llm, IntPtr tools_json);
-
-    /**
-    * \~japanese
-    * @brief 生成テキストを構造化した結果のJSONの長さを取得します。(NULL文字含む)
-    * @param llm       LLMオブジェクトポインタ
-    * @param text      モデルの生の出力テキスト(UTF8、NULL終端)
-    * @param buf_size  JSONの長さ
-    * @return
-    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
-    *
-    * \~english
-    * @brief Gets the size of the JSON obtained by parsing the generated text. (Include null)
-    * @param llm       A LLM instance pointer
-    * @param text      Raw output text of the model (UTF8, null terminated)
-    * @param buf_size  The length of the JSON
-    * @return
-    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
-    */
-    [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMParseResponseSize(IntPtr llm, IntPtr text, ref uint buf_size);
-
-    /**
-    * \~japanese
-    * @brief モデルの生の出力テキストを解析し、OpenAI互換のassistantメッセージJSONに変換します。
-    * @param llm       LLMオブジェクトポインタ
-    * @param text      モデルの生の出力テキスト(UTF8、NULL終端)
-    * @param json      JSON(UTF8)
-    * @param buf_size  バッファサイズ
-    * @return
-    *   成功した場合は \ref AILIA_LLM_STATUS_SUCCESS 、そうでなければエラーコードを返す。
-    * @details
-    *   {"role":"assistant","content":"...","reasoning_content":"...","tool_calls":[...]} の形式で返します。
-    *   ailiaLLMSetPromptを呼び出す前は \ref AILIA_LLM_STATUS_INVALID_STATE 、構文が一致しない場合は \ref AILIA_LLM_STATUS_PARSE_ERROR を返します。
-    *
-    * \~english
-    * @brief Parses the raw output text of the model into an OpenAI-compatible assistant message JSON.
-    * @param llm       A LLM instance pointer
-    * @param text      Raw output text of the model (UTF8, null terminated)
-    * @param json      JSON(UTF8)
-    * @param buf_size  Buffer size
-    * @return
-    *   If this function is successful, it returns  \ref AILIA_LLM_STATUS_SUCCESS , or an error code otherwise.
-    * @details
-    *   Returns {"role":"assistant","content":"...","reasoning_content":"...","tool_calls":[...]}.
-    *   Returns \ref AILIA_LLM_STATUS_INVALID_STATE before ailiaLLMSetPrompt is called, and \ref AILIA_LLM_STATUS_PARSE_ERROR when the text does not match the syntax.
-    */
-    [DllImport(LIBRARY_NAME)]
-    public static extern int ailiaLLMParseResponse(IntPtr llm, IntPtr text, IntPtr json, uint buf_size);
 
     /**
     * \~japanese
@@ -463,6 +417,13 @@ public class AiliaLLM
     */
     [DllImport(LIBRARY_NAME)]
     public static extern int ailiaLLMSetPrompt(IntPtr llm, IntPtr messages, uint messages_len);
+
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMSetPromptJson(IntPtr llm, IntPtr messages_json);
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetResponseJsonSize(IntPtr llm, ref uint size);
+    [DllImport(LIBRARY_NAME)]
+    public static extern int ailiaLLMGetResponseJson(IntPtr llm, IntPtr json, uint size);
 
     /**
     * \~japanese
